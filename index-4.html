@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Event Horizon Arcade - Play Free Games, Earn Coins</title>
+<meta name="description" content="Play free arcade games and collect coins.">
+<style>
+*{box-sizing:border-box}
+:root{--bg:#03030a;--panel:#0d0d1f;--line:#1f1f3d;--txt:#e6e6ff;--mute:#8c8cb3;--violet:#a855f7;--cyan:#22d3ee;--amber:#f59e0b}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--txt);min-height:100vh;
+  background:
+    radial-gradient(ellipse at 50% -10%,#2a0f4d55 0,transparent 60%),
+    radial-gradient(1px 1px at 20% 30%,#fff8 50%,transparent 51%),
+    radial-gradient(1px 1px at 70% 60%,#fff6 50%,transparent 51%),
+    radial-gradient(1px 1px at 40% 80%,#fff5 50%,transparent 51%),
+    radial-gradient(1.5px 1.5px at 85% 15%,#fff9 50%,transparent 51%),
+    radial-gradient(1px 1px at 10% 90%,#fff5 50%,transparent 51%),
+    var(--bg);
+  background-attachment:fixed}
+header{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 14px;background:#05050fdd;backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px}
+.hole{width:34px;height:34px;border-radius:50%;background:#000;position:relative;flex:none;box-shadow:0 0 14px 3px var(--amber),0 0 28px 6px var(--violet)}
+.hole:before{content:"";position:absolute;inset:-6px;border-radius:50%;border:3px solid transparent;border-top-color:var(--amber);border-bottom-color:var(--violet);animation:spin 3s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.logo{font-weight:900;letter-spacing:1px;font-size:15px;text-transform:uppercase;background:linear-gradient(90deg,var(--cyan),var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
+.coins{background:linear-gradient(90deg,var(--amber),#fbbf24);color:#000;padding:5px 11px;border-radius:99px;font-weight:800;font-size:14px;white-space:nowrap}
+nav{display:flex;gap:8px;padding:10px 14px;max-width:900px;margin:auto;overflow-x:auto}
+nav button{flex:1;min-width:max-content;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--mute);font-weight:700;font-size:14px;cursor:pointer}
+nav button.on{color:#fff;border-color:var(--violet);box-shadow:0 0 14px #a855f755}
+main{max-width:900px;margin:auto;padding:0 14px 40px}
+h2.t{margin:16px 0 8px;font-size:18px;letter-spacing:.5px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.card{background:linear-gradient(160deg,#15152e,#0a0a18);border:1px solid var(--line);color:var(--txt);border-radius:16px;padding:16px 8px;text-align:center;cursor:pointer;transition:.2s;font:inherit}
+.card:hover{transform:translateY(-3px);border-color:var(--violet);box-shadow:0 0 22px #a855f755}
+.card span{font-size:34px;display:block;filter:drop-shadow(0 0 6px #22d3ee88)}
+.card b{display:block;margin-top:6px;font-size:14px}
+.card small{color:var(--cyan);font-size:12px}
+.modal{position:fixed;inset:0;background:#000d;display:none;align-items:center;justify-content:center;z-index:20;padding:12px}
+.modal.show{display:flex}
+.box{background:var(--panel);border:1px solid var(--violet);box-shadow:0 0 40px #a855f744;border-radius:18px;padding:16px;width:100%;max-width:380px;max-height:96vh;overflow:auto;text-align:center}
+.cv{width:100%;max-width:320px;border-radius:12px;display:block;margin:8px auto;touch-action:none;border:1px solid var(--line)}
+.btn{background:linear-gradient(90deg,var(--violet),#7c3aed);color:#fff;border:0;border-radius:10px;padding:10px 16px;font-weight:700;font-size:15px;margin:4px;cursor:pointer;box-shadow:0 0 14px #a855f755}
+.btn.ghost{background:#1a1a33;box-shadow:none}
+.gh{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.quiz{text-align:center}
+.quiz button{display:block;width:100%;margin:6px 0;padding:12px;border-radius:10px;border:1px solid var(--line);background:#15152e;color:#fff;font-size:16px;cursor:pointer}
+.quiz button:hover{border-color:var(--cyan)}
+.quiz input[type=number]{width:100%;padding:10px;font-size:18px;border-radius:8px;border:1px solid var(--line);background:#0a0a18;color:#fff;margin:6px 0;text-align:center}
+.g2048{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:280px;max-width:100%;margin:8px auto;background:#1a1a33;padding:6px;border-radius:10px}
+.g2048 i{height:60px;display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:800;border-radius:6px;color:#fff}
+.ttt{display:grid;grid-template-columns:repeat(3,86px);gap:6px;justify-content:center;margin:10px 0}
+.ttt button{height:86px;font-size:40px;border:1px solid var(--line);border-radius:10px;background:#15152e;color:#fff;cursor:pointer}
+.mem{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0}
+.mem button{height:64px;font-size:28px;border:1px solid var(--line);border-radius:10px;background:#15152e;color:#fff;cursor:pointer}
+.mem .on{background:var(--violet)}
+.mole{display:grid;grid-template-columns:repeat(3,80px);gap:8px;justify-content:center;margin:10px 0}
+.mole button{height:80px;font-size:38px;border:0;border-radius:50%;background:#2a1a40;cursor:pointer}
+.pad{margin-top:8px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.pad div{display:flex;gap:4px}
+.pad button{width:54px;height:44px;border:1px solid var(--line);border-radius:10px;background:#15152e;color:#fff;font-size:18px;cursor:pointer}
+.hint{color:var(--mute);font-size:13px;margin:4px 0}
+.note{background:#15152e;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:14px;line-height:1.5;color:var(--mute);margin:10px 0}
+.row2{display:flex;justify-content:space-between;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:8px 0}
+#gbox>*{margin-left:auto;margin-right:auto}
+@media (max-width:420px){.logo{font-size:13px}.coins{font-size:13px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="hole"></div><div class="logo">Event Horizon Arcade</div></div>
+  <div class="coins">🪙 <span id="coins">0</span></div>
+</header>
+<nav><button id="tg" class="on" data-t="games">🎮 Games</button><button id="ts" data-t="surveys">📝 Surveys</button><button id="tb" data-t="board">🏆 My Bests</button><button id="tw" data-t="wallet">💰 Wallet</button></nav>
+<main>
+<section id="games"><h2 class="t">Play games, collect coins</h2><div class="grid" id="grid"></div></section>
+<section id="surveys" style="display:none"><h2 class="t">📝 Surveys</h2><p class="hint">Answer a quick survey and earn 5 coins. Each survey can be done once.</p><div id="svlist"></div></section>
+<section id="board" style="display:none"><h2 class="t">🏆 My best scores</h2><div id="boardlist"></div></section>
+<section id="wallet" style="display:none"><h2 class="t">Wallet</h2><div id="wbox"></div></section>
+</main>
+
+<div id="svm" class="modal"><div class="box" id="svbox"></div></div>
+
+<div id="gm" class="modal"><div class="box">
+<div class="gh"><b id="gn"></b><span>Score: <b id="sc">0</b></span><button class="btn ghost" style="padding:4px 12px;margin:0" id="gx">✕</button></div>
+<div id="gbox"></div>
+<div id="over" style="display:none"></div>
+</div></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const rnd=n=>Math.floor(Math.random()*n);
+
+/* ---------- SAVED DATA (this browser only) ---------- */
+let SAVE={coins:0,life:0,plays:0,best:{},sv:{}};
+try{const s=JSON.parse(localStorage.getItem('eha')||'null');if(s&&typeof s==='object')SAVE=Object.assign(SAVE,s)}catch(e){}
+const persist=()=>{try{localStorage.setItem('eha',JSON.stringify(SAVE))}catch(e){}};
+const showCoins=()=>$('#coins').textContent=SAVE.coins;
+showCoins();
+
+/* ---------- NAV ---------- */
+const TABS={games:'tg',surveys:'ts',board:'tb',wallet:'tw'};
+function tab(t){
+  for(const x in TABS){$('#'+x).style.display=x==t?'':'none';$('#'+TABS[x]).className=x==t?'on':''}
+  if(t=='wallet')renderWallet();
+  if(t=='board')renderBoard();
+  if(t=='surveys')renderSurveys();
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>tab(b.dataset.t));
+
+/* ---------- GAME HELPERS ---------- */
+function mk(box,w,h){const c=document.createElement('canvas');c.width=w;c.height=h;c.className='cv';box.appendChild(c);return c.getContext('2d')}
+function pad(box,A,f){
+  const m={ArrowLeft:'l',a:'l',ArrowRight:'r',d:'r',ArrowUp:'u',w:'u',ArrowDown:'d',s:'d'};
+  A.on(document,'keydown',e=>{const k=m[e.key];if(k){e.preventDefault();f(k)}});
+  let sx=0,sy=0;
+  A.on(box,'touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
+  A.on(box,'touchend',e=>{const t=e.changedTouches[0],dx=t.clientX-sx,dy=t.clientY-sy;if(Math.max(Math.abs(dx),Math.abs(dy))>25)f(Math.abs(dx)>Math.abs(dy)?(dx>0?'r':'l'):(dy>0?'d':'u'))},{passive:true});
+  const p=document.createElement('div');p.className='pad';
+  p.innerHTML='<button data-k="u">▲</button><div><button data-k="l">◀</button><button data-k="d">▼</button><button data-k="r">▶</button></div>';
+  p.onclick=e=>{const k=e.target.dataset.k;if(k)f(k)};
+  box.appendChild(p);
+}
+
+/* ---------- GAMES ---------- */
+function snake(box,A){
+  const x=mk(box,300,300);let s=[{x:10,y:10}],d={x:1,y:0},nd=d,f={x:5,y:5},sc=0;
+  pad(box,A,k=>{const v={l:[-1,0],r:[1,0],u:[0,-1],d:[0,1]}[k];if(v[0]+d.x||v[1]+d.y)nd={x:v[0],y:v[1]}});
+  A.every(()=>{
+    d=nd;const h={x:s[0].x+d.x,y:s[0].y+d.y};
+    if(h.x<0||h.y<0||h.x>19||h.y>19||s.some(p=>p.x==h.x&&p.y==h.y))return A.end();
+    s.unshift(h);
+    if(h.x==f.x&&h.y==f.y){A.score(++sc);f={x:rnd(20),y:rnd(20)}}else s.pop();
+    x.fillStyle='#03030a';x.fillRect(0,0,300,300);
+    x.fillStyle='#22d3ee';s.forEach(p=>x.fillRect(p.x*15,p.y*15,14,14));
+    x.fillStyle='#a855f7';x.fillRect(f.x*15,f.y*15,14,14);
+  },120);
+}
+function g2048(box,A){
+  const g=Array(16).fill(0);let sc=0;
+  const div=document.createElement('div');div.className='g2048';box.appendChild(div);
+  const add=()=>{const e=g.map((v,i)=>v?-1:i).filter(i=>i>=0);if(e.length)g[e[rnd(e.length)]]=Math.random()<.9?2:4};
+  const draw=()=>{div.innerHTML=g.map(v=>`<i style="background:hsl(${260+Math.log2(v||1)*12} 70% ${v?45:14}%)">${v||''}</i>`).join('')};
+  const line=a=>{const r=a.filter(v=>v);for(let i=0;i<r.length-1;i++)if(r[i]==r[i+1]){r[i]*=2;sc+=r[i];r.splice(i+1,1)}while(r.length<4)r.push(0);return r};
+  const canMove=()=>g.some((v,i)=>(i%4<3&&v==g[i+1])||(i<12&&v==g[i+4]));
+  add();add();draw();
+  pad(box,A,k=>{
+    const o=g.join();
+    for(let i=0;i<4;i++){
+      const idx=[0,1,2,3].map(j=>k=='l'?i*4+j:k=='r'?i*4+3-j:k=='u'?j*4+i:(3-j)*4+i);
+      const r=line(idx.map(j=>g[j]));idx.forEach((j,n)=>g[j]=r[n]);
+    }
+    if(g.join()!=o){add();A.score(sc)}
+    draw();
+    if(!g.includes(0)&&!canMove())A.end();
+  });
+}
+function ttt(box,A){
+  let b=Array(9).fill(''),done=false;
+  const div=document.createElement('div');div.className='ttt';box.appendChild(div);
+  const L=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  const win=p=>L.some(l=>l.every(i=>b[i]==p));
+  const draw=()=>div.innerHTML=b.map((v,i)=>`<button data-i="${i}">${v}</button>`).join('');
+  const find=p=>{for(const l of L){const e=l.filter(i=>!b[i]);if(e.length==1&&l.filter(i=>b[i]==p).length==2)return e[0]}return -1};
+  const cpu=()=>{let m=find('O');if(m<0)m=find('X');if(m<0&&!b[4])m=4;if(m<0){const e=b.map((v,i)=>v?-1:i).filter(i=>i>=0);m=e[rnd(e.length)]}b[m]='O'};
+  const fin=sc=>{done=true;draw();A.score(sc);A.after(()=>A.end(),700)};
+  draw();
+  div.onclick=e=>{
+    const i=e.target.dataset.i;if(done||i==null||b[i])return;
+    b[i]='X';
+    if(win('X'))return fin(10);
+    if(!b.includes(''))return fin(3);
+    cpu();
+    if(win('O'))return fin(0);
+    if(!b.includes(''))return fin(3);
+    draw();
+  };
+}
+function memory(box,A){
+  const em='🍎🍌🍇🍉🍒🥝🍍🍓'.match(/./gu);
+  const c=[...em,...em].sort(()=>Math.random()-.5);const sh=Array(16).fill(false);
+  let open=[],lock=false,found=0;
+  const div=document.createElement('div');div.className='mem';box.appendChild(div);
+  const draw=()=>div.innerHTML=c.map((v,i)=>`<button data-i="${i}" class="${sh[i]?'on':''}">${sh[i]?v:'?'}</button>`).join('');
+  draw();
+  div.onclick=e=>{
+    const i=+e.target.dataset.i;if(lock||isNaN(i)||sh[i])return;
+    sh[i]=true;open.push(i);draw();
+    if(open.length==2){
+      const[a,b]=open;open=[];
+      if(c[a]==c[b]){found++;A.score(found*10);if(found==8)A.after(()=>A.end(),500)}
+      else{lock=true;A.after(()=>{sh[a]=sh[b]=false;lock=false;draw()},700)}
+    }
+  };
+}
+function flappy(box,A){
+  const x=mk(box,300,400);let y=200,v=0,P=[],t=0,sc=0;
+  const fl=()=>v=-5.5;
+  A.on(x.canvas,'pointerdown',fl);
+  A.on(document,'keydown',e=>{if(e.code=='Space'){e.preventDefault();fl()}});
+  A.every(()=>{
+    v+=.35;y+=v;t++;
+    if(t%90==1)P.push({x:300,g:80+rnd(180),p:0});
+    P.forEach(p=>p.x-=2);P=P.filter(p=>p.x>-40);
+    x.fillStyle='#050514';x.fillRect(0,0,300,400);x.fillStyle='#a855f7';
+    for(const p of P){
+      x.fillRect(p.x,0,40,p.g-60);x.fillRect(p.x,p.g+60,40,400);
+      if(!p.p&&p.x<60){p.p=1;A.score(++sc)}
+      if(p.x<86&&p.x+40>70&&(y<p.g-60||y+16>p.g+60))return A.end();
+    }
+    x.fillStyle='#f59e0b';x.beginPath();x.arc(78,y+8,8,0,7);x.fill();
+    if(y<0||y>384)A.end();
+  },16);
+}
+function quiz(box,A){
+  const Q=[['What is the capital of India?',['Mumbai','New Delhi','Kolkata'],1],['Where is the Taj Mahal?',['Agra','Jaipur','Lucknow'],0],['7 x 8 = ?',['54','56','64'],1],['Which is the largest planet?',['Earth','Mars','Jupiter'],2],['What is the national animal of India?',['Lion','Tiger','Deer'],1],['Chemical formula of water?',['CO2','H2O','O2'],1],['How many players in a cricket team?',['9','11','12'],1],['Where does the sun rise?',['East','West','North'],0],['How many months in a year?',['10','12','14'],1],['What is the national flower of India?',['Rose','Lotus','Marigold'],1]];
+  const q=Q.sort(()=>Math.random()-.5);let i=0,sc=0;
+  const d=document.createElement('div');d.className='quiz';box.appendChild(d);
+  const show=()=>{if(i>=q.length)return A.end();const[t,o]=q[i];d.innerHTML=`<h3>${i+1}/${q.length}. ${t}</h3>`+o.map((v,j)=>`<button data-j="${j}">${v}</button>`).join('')};
+  d.onclick=e=>{const j=e.target.dataset.j;if(j==null)return;if(+j==q[i][2]){sc+=10;A.score(sc)}i++;show()};
+  show();
+}
+function mole(box,A){
+  let sc=0,t=30,m=-1;
+  const hd=document.createElement('p');hd.className='hint';hd.textContent='⏱ 30';box.appendChild(hd);
+  const d=document.createElement('div');d.className='mole';box.appendChild(d);
+  const draw=()=>d.innerHTML=Array.from({length:9},(_,i)=>`<button data-i="${i}">${i==m?'🐹':''}</button>`).join('');
+  A.every(()=>{m=rnd(9);draw()},750);
+  A.every(()=>{hd.textContent='⏱ '+(--t);if(t<=0)A.end()},1000);
+  d.onclick=e=>{const i=e.target.dataset.i;if(i!=null&&+i==m){m=-1;A.score(++sc);draw()}};
+  draw();
+}
+function guess(box,A){
+  const n=1+rnd(100);let left=7;
+  box.innerHTML='<div class="quiz"><h3>Guess a number from 1 to 100</h3><input id="gi" type="number" inputmode="numeric"><button id="gb">Guess</button><p class="hint" id="gmsg">7 tries left</p></div>';
+  const gi=box.querySelector('#gi'),gm=box.querySelector('#gmsg');
+  box.querySelector('#gb').onclick=()=>{
+    const v=+gi.value;if(!v)return;left--;gi.value='';
+    if(v==n){A.score((left+1)*10);return A.end()}
+    if(left==0){gm.textContent='The number was '+n;A.score(0);return A.after(()=>A.end(),900)}
+    gm.textContent=(v<n?'⬆️ Try higher':'⬇️ Try lower')+' - '+left+' tries left';
+  };
+}
+
+/* rw = score needed for 1 coin (max 20 coins per play) */
+const GAMES=[
+  {id:'snake',n:'Snake',e:'🐍',f:snake,rw:1},
+  {id:'2048',n:'2048',e:'🔢',f:g2048,rw:60},
+  {id:'ttt',n:'Tic Tac Toe',e:'⭕',f:ttt,rw:5},
+  {id:'memory',n:'Memory',e:'🧠',f:memory,rw:8},
+  {id:'flappy',n:'Flappy',e:'🐦',f:flappy,rw:1},
+  {id:'quiz',n:'Quiz',e:'❓',f:quiz,rw:8},
+  {id:'mole',n:'Whack-a-Mole',e:'🐹',f:mole,rw:1},
+  {id:'guess',n:'Guess the Number',e:'🎯',f:guess,rw:8}
+];
+$('#grid').innerHTML=GAMES.map((g,i)=>`<button class="card" data-i="${i}"><span>${g.e}</span><b>${g.n}</b><small>Earn coins</small></button>`).join('');
+$('#grid').onclick=e=>{const c=e.target.closest('.card');if(c)startGame(GAMES[+c.dataset.i])};
+
+/* ---------- GAME ENGINE ---------- */
+let CUR=null;
+function startGame(g){
+  closeGame(true);
+  const box=$('#gbox');box.innerHTML='';box.onclick=null;box.onclick=null;
+  $('#over').style.display='none';$('#sc').textContent='0';$('#gn').textContent=g.e+' '+g.n;
+  $('#gm').classList.add('show');
+  const ls=[],ti=[],to=[];
+  const A=CUR={g,score:0,over:false,ls,ti,to,
+    on(t,ev,fn,o){t.addEventListener(ev,fn,o);ls.push([t,ev,fn,o])},
+    every(fn,ms){ti.push(setInterval(()=>{if(!A.over)fn()},ms))},
+    after(fn,ms){to.push(setTimeout(()=>{if(!A.over)fn()},ms))},
+    score(n){A.score=n;$('#sc').textContent=n},
+    end(){endGame(A)}};
+  g.f(box,A);
+}
+function cleanup(A){
+  A.ls.forEach(([t,ev,fn,o])=>t.removeEventListener(ev,fn,o));
+  A.ti.forEach(clearInterval);A.to.forEach(clearTimeout);A.ls=[];A.ti=[];A.to=[];
+}
+function endGame(A){
+  if(A.over)return;A.over=true;cleanup(A);
+  const g=A.g,earned=Math.min(20,Math.floor(A.score/g.rw));
+  SAVE.coins+=earned;SAVE.life+=earned;SAVE.plays++;
+  if(A.score>(SAVE.best[g.id]||0))SAVE.best[g.id]=A.score;
+  persist();showCoins();
+  const o=$('#over');o.style.display='';
+  o.innerHTML=`<h3>Game over</h3><p>Score: <b>${A.score}</b></p><p>🪙 +${earned} coins</p><button class="btn" id="again">Play again</button><button class="btn ghost" id="close2">Close</button>`;
+  $('#again').onclick=()=>startGame(g);
+  $('#close2').onclick=()=>closeGame();
+}
+function closeGame(silent){
+  if(CUR){CUR.over=true;cleanup(CUR);CUR=null}
+  $('#gbox').innerHTML='';$('#over').style.display='none';
+  if(!silent)$('#gm').classList.remove('show');
+}
+$('#gx').onclick=()=>closeGame();
+
+/* ---------- SURVEYS ---------- */
+const SV_COINS=5;
+const SV_WALL_URL=''; /* optional: paste a CPX Research / BitLabs iframe URL here */
+const SV=[
+ {id:'s1',e:'🎬',t:'Movies & Shows',q:[['How often do you watch movies or shows?',['Daily','Weekly','Monthly','Rarely']],['Where do you mostly watch?',['Phone','TV','Laptop','Theatre']],['Favourite type?',['Action','Comedy','Romance','Thriller']],['Which language do you prefer?',['Hindi','English','Regional','Any']]]},
+ {id:'s2',e:'🍕',t:'Food & Eating Out',q:[['How often do you order food online?',['Daily','Weekly','Monthly','Never']],['Favourite meal?',['Breakfast','Lunch','Snacks','Dinner']],['Which do you prefer?',['Street food','Restaurant','Home food','Fast food']],['Sweet or spicy?',['Sweet','Spicy','Both','Neither']]]},
+ {id:'s3',e:'📱',t:'Mobile & Apps',q:[['How many hours a day do you use your phone?',['Under 2','2-4','4-6','Over 6']],['Which app do you use most?',['WhatsApp','YouTube','Instagram','Games']],['Which phone brand do you use?',['Samsung','Xiaomi/Redmi','Realme/Oppo/Vivo','Apple/Other']],['Do you pay for any app?',['Yes','No','Sometimes','Not sure']]]},
+ {id:'s4',e:'🛍️',t:'Online Shopping',q:[['How often do you shop online?',['Weekly','Monthly','Few times a year','Never']],['What do you buy most?',['Clothes','Electronics','Groceries','Gifts']],['What matters most?',['Price','Quality','Delivery speed','Reviews']],['How do you usually pay?',['UPI','Card','Cash on delivery','Wallet']]]},
+ {id:'s5',e:'✈️',t:'Travel',q:[['How often do you travel?',['Monthly','Few times a year','Once a year','Rarely']],['Favourite way to travel?',['Train','Bus','Car/Bike','Flight']],['Best kind of trip?',['Beach','Mountains','City','Temple/Heritage']],['Who do you travel with?',['Family','Friends','Alone','Partner']]]},
+ {id:'s6',e:'💪',t:'Fitness & Health',q:[['How often do you exercise?',['Daily','3-4 days a week','Rarely','Never']],['Favourite activity?',['Walking','Gym','Yoga','Sports']],['How many hours do you sleep?',['Under 5','5-6','7-8','Over 8']],['Do you drink enough water?',['Always','Mostly','Sometimes','Rarely']]]},
+ {id:'s7',e:'🎵',t:'Music',q:[['How do you listen to music?',['YouTube','Spotify/Gaana','Radio','Downloads']],['Favourite music?',['Bollywood','Punjabi','Hip-hop','Devotional/Classical']],['When do you listen most?',['Travelling','Working','Night','Always']],['Headphones or speaker?',['Earphones','Headphones','Speaker','Phone speaker']]]},
+ {id:'s8',e:'📚',t:'Study & Learning',q:[['How do you learn new things?',['YouTube','Books','Courses','Friends']],['Best time to study?',['Morning','Afternoon','Evening','Night']],['What do you want to learn?',['Coding','English','Business','Creative skills']],['Do you prefer free or paid courses?',['Free','Paid','Both','Neither']]]},
+ {id:'s9',e:'🏏',t:'Cricket & Sports',q:[['Do you follow cricket?',['Every match','Big matches','Sometimes','No']],['Favourite format?',['Test','ODI','T20','IPL']],['Which other sport do you like?',['Football','Kabaddi','Badminton','Other']],['Where do you watch matches?',['TV','Phone','Stadium','Do not watch']]]},
+ {id:'s10',e:'💬',t:'Social Media',q:[['Which platform do you use most?',['Instagram','Facebook','YouTube','X/Twitter']],['How often do you post?',['Daily','Weekly','Rarely','Never']],['Why do you use social media?',['Entertainment','News','Friends','Work']],['Do you watch short videos/reels?',['Many a day','Few a day','Rarely','Never']]]},
+ {id:'s11',e:'🎮',t:'Gaming',q:[['How often do you play games?',['Daily','Weekly','Monthly','Never']],['On what do you play?',['Phone','PC','Console','Browser']],['Favourite game type?',['Puzzle','Racing','Shooting','Strategy']],['Do you spend money on games?',['Often','Sometimes','Rarely','Never']]]},
+ {id:'s12',e:'🌅',t:'Daily Routine',q:[['When do you wake up?',['Before 6','6-8','8-10','After 10']],['Tea or coffee?',['Tea','Coffee','Both','Neither']],['Weekend plan?',['Stay home','Meet friends','Family time','Go out']],['Morning person or night owl?',['Morning','Night','Both','Neither']]]}
+];
+function renderSurveys(){
+  const done=SAVE.sv||{};
+  $('#svlist').innerHTML=SV.map((s,i)=>`<div class="row2"><span>${s.e} <b>${s.t}</b><br><small class="hint">${s.q.length} questions · +${SV_COINS} coins</small></span><button class="btn" data-i="${i}" ${done[s.id]?'disabled style="opacity:.5"':''}>${done[s.id]?'Done ✓':'Start'}</button></div>`).join('')
+   +(SV_WALL_URL?'<h2 class="t">Paid Survey Wall</h2><iframe src="'+SV_WALL_URL+'" style="width:100%;height:600px;border:0;border-radius:12px;background:#fff"></iframe>':'');
+}
+$('#svlist').onclick=e=>{const b=e.target.closest('button[data-i]');if(b&&!b.disabled)openSurvey(+b.dataset.i)};
+function openSurvey(i){
+  const s=SV[i],box=$('#svbox');let n=0;
+  const close=()=>{$('#svm').classList.remove('show');renderSurveys()};
+  const draw=()=>{
+    if(n>=s.q.length){
+      let msg='Thank you!';
+      if(!SAVE.sv[s.id]){SAVE.sv[s.id]=1;SAVE.coins+=SV_COINS;SAVE.life+=SV_COINS;persist();showCoins();msg='Thank you! 🪙 +'+SV_COINS+' coins'}
+      box.innerHTML='<h3>'+msg+'</h3><button class="btn" id="svd">Done</button>';
+      $('#svd').onclick=close;return;
+    }
+    const[q,o]=s.q[n];
+    box.innerHTML=`<div class="gh"><b>${s.e} ${s.t}</b><button class="btn ghost" style="padding:4px 12px;margin:0" id="svx">✕</button></div><p class="hint">Question ${n+1} of ${s.q.length}</p><div class="quiz"><h3>${q}</h3>${o.map((v,j)=>`<button data-j="${j}">${v}</button>`).join('')}</div>`;
+    $('#svx').onclick=close;
+    box.querySelector('.quiz').onclick=e=>{if(e.target.dataset.j!=null){n++;draw()}};
+  };
+  $('#svm').classList.add('show');draw();
+}
+
+/* ---------- BOARD + WALLET ---------- */
+function renderBoard(){
+  $('#boardlist').innerHTML=GAMES.map(g=>`<div class="row2"><span>${g.e} ${g.n}</span><b>${SAVE.best[g.id]||0}</b></div>`).join('')+'<p class="hint">Best scores are saved in this browser only.</p>';
+}
+function renderWallet(){
+  $('#wbox').innerHTML=`<div class="row2"><span>Coins balance</span><b>🪙 ${SAVE.coins}</b></div>
+  <div class="row2"><span>Total coins earned</span><b>${SAVE.life}</b></div>
+  <div class="row2"><span>Games played</span><b>${SAVE.plays}</b></div>
+  <div class="note">Coins are for fun and are saved in this browser only. Cash withdrawals are not available.</div>`;
+}
+</script>
+</body>
+</html>
